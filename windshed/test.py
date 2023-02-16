@@ -10,6 +10,7 @@ import time
 
 from pathlib import Path
 
+import cupy
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -47,6 +48,7 @@ def get_dem():
 
     # Use xrio for the data array
     dem = xrio.open_rasterio(DEM_FPATH)[0, :3_000, :3_000]
+    dem.data = cupy.array(dem.data)
     profile["height"] = dem.shape[0]
     profile["width"] = dem.shape[1]
 
@@ -104,11 +106,18 @@ def main():
 
     # Get viewshed array
     arg_list = [(dem, turbine) for _, turbine in turbines.iterrows()]
-    nturbines = turbines.shape[0]
+    # nturbines = turbines.shape[0]
+    # views = []
+    # with mp.Pool(mp.cpu_count() - 1) as pool:
+    #     for view in tqdm(pool.imap(get_view, arg_list), total=nturbines):
+    #         views.append(view)
+
+    # Get viewshed array
     views = []
-    with mp.Pool(mp.cpu_count() - 1) as pool:
-        for view in tqdm(pool.imap(get_view, arg_list), total=nturbines):
-            views.append(view)
+    for args in tqdm(arg_list):
+        break
+        view = get_view(args)
+        views.append(view)
 
     # Build composite
     view = np.array(views).max(axis=0)
@@ -127,5 +136,5 @@ def main():
     print(f"Finished in {round(duration / 60, 2)} minutes")
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

@@ -8,7 +8,6 @@ Created on Tue Feb 14 13:43:12 2023
 import time
 import warnings
 
-import cartopy.crs as ccrs
 import cupy
 import matplotlib.pyplot as plt
 import numpy as np
